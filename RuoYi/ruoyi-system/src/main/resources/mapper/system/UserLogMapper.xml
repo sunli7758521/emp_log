@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.UserLogMapper">
+    
+    <resultMap type="UserLog" id="UserLogResult">
+        <result property="logId"    column="log_id"    />
+        <result property="description"    column="description"    />
+        <result property="userId"    column="user_id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="verifyPeopleName"    column="verify_people_name"    />
+        <result property="status"    column="status"    />
+        <result property="unfinished"    column="unfinished"    />
+        <result property="editStatus"    column="edit_status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+	
+	<sql id="selectUserLogVo">
+        select log_id, description, user_id,dept_id, verify_people_name, status, unfinished, edit_status, create_time, update_time, remark from user_log
+    </sql>
+    <select id="selectUserLogList" parameterType="UserLog" resultType="com.ruoyi.system.domain.UserLog">
+        SELECT
+            user_log.log_id as logId,
+            user_log.description as description,
+            user_log.user_id as userId,
+            user_log.dept_id as deptId,
+            user_log.verify_people_name as verifyPeopleName,
+            user_log.status AS status,
+            user_log.unfinished AS unfinished,
+            user_log.edit_status AS editStatus,
+            user_log.create_time AS createTime,
+            user_log.update_time AS updateTime,
+            user_log.remark AS remark,
+            sys_user.user_name AS userName
+        FROM
+            user_log,
+            sys_user
+        WHERE
+            user_log.user_id = sys_user.user_id
+        <if test="userId != null ">
+            and user_log.user_id = #{userId}
+        </if>
+        <if test="userName !=null and userName !=''">
+            and sys_user.user_name like concat('%', #{userName}, '%')
+        </if>
+        <if test="verifyPeopleName !=null and verifyPeopleName !=''">
+            and user_log.verify_people_name like concat('%', #{verifyPeopleName}, '%')
+        </if>
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            AND date_format(u.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            AND date_format(u.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+            ORDER BY user_log.create_time DESC
+    </select>
+	
+    <!--<select id="selectUserLogList" parameterType="UserLog" resultMap="UserLogResult">-->
+        <!--<include refid="selectUserLogVo"/>-->
+        <!--<where>  -->
+            <!--<if test="logId != null "> and log_id = #{logId}</if>-->
+             <!--<if test="description != null  and description != '' "> and description = #{description}</if>-->
+             <!--<if test="userId != null "> and user_id = #{userId}</if>-->
+             <!--<if test="verifyPeople != null "> and verify_people_name = #{verifyPeopleName}</if>-->
+             <!--<if test="status != null  and status != '' "> and status = #{status}</if>-->
+             <!--<if test="unfinished != null  and unfinished != '' "> and unfinished = #{unfinished}</if>-->
+             <!--<if test="editStatus != null  and editStatus != '' "> and edit_status = #{editStatus}</if>-->
+             <!--<if test="createTime != null "> and create_time = #{createTime}</if>-->
+             <!--<if test="updateTime != null "> and update_time = #{updateTime}</if>-->
+             <!--<if test="remark != null  and remark != '' "> and remark = #{remark}</if>-->
+         <!--</where>-->
+    <!--</select>-->
+    
+    <select id="selectUserLogById" parameterType="Long" resultMap="UserLogResult">
+        <include refid="selectUserLogVo"/>
+        where log_id = #{logId}
+    </select>
+        
+    <insert id="insertUserLog" parameterType="UserLog" useGeneratedKeys="true" keyProperty="logId">
+        insert into user_log
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="description != null  and description != ''  ">description,</if>
+			<if test="userId != null  ">user_id,</if>
+			<if test="deptId != null  ">dept_id,</if>
+			<if test="verifyPeopleName != null  ">verify_people_name,</if>
+			<if test="status != null  and status != ''  ">status,</if>
+			<if test="unfinished != null  and unfinished != ''  ">unfinished,</if>
+			<if test="editStatus != null  and editStatus != ''  ">edit_status,</if>
+			<if test="createTime != null  ">create_time,</if>
+			<if test="updateTime != null  ">update_time,</if>
+			<if test="remark != null  and remark != ''  ">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="description != null  and description != ''  ">#{description},</if>
+			<if test="userId != null  ">#{userId},</if>
+			<if test="deptId != null  ">#{deptId},</if>
+			<if test="verifyPeopleName != null  ">#{verifyPeopleName},</if>
+			<if test="status != null  and status != ''  ">#{status},</if>
+			<if test="unfinished != null  and unfinished != ''  ">#{unfinished},</if>
+			<if test="editStatus != null  and editStatus != ''  ">#{editStatus},</if>
+			<if test="createTime != null  ">#{createTime},</if>
+			<if test="updateTime != null  ">#{updateTime},</if>
+			<if test="remark != null  and remark != ''  ">#{remark},</if>
+         </trim>
+    </insert>
+	 
+    <update id="updateUserLog" parameterType="UserLog">
+        update user_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="description != null  and description != ''  ">description = #{description},</if>
+            <if test="userId != null  ">user_id = #{userId},</if>
+            <if test="deptId != null  ">dept_id = #{deptId},</if>
+            <if test="verifyPeopleName != null  ">verify_people_name = #{verifyPeopleName},</if>
+            <if test="status != null  and status != ''  ">status = #{status},</if>
+            <if test="unfinished != null  and unfinished != ''  ">unfinished = #{unfinished},</if>
+            <if test="editStatus != null  and editStatus != ''  ">edit_status = #{editStatus},</if>
+            <if test="createTime != null  ">create_time = #{createTime},</if>
+            <if test="updateTime != null  ">update_time = #{updateTime},</if>
+            <if test="remark != null  and remark != ''  ">remark = #{remark},</if>
+        </trim>
+        where log_id = #{logId}
+    </update>
+
+	<delete id="deleteUserLogById" parameterType="Long">
+        delete from user_log where log_id = #{logId}
+    </delete>
+	
+    <delete id="deleteUserLogByIds" parameterType="String">
+        delete from user_log where log_id in 
+        <foreach item="logId" collection="array" open="(" separator="," close=")">
+            #{logId}
+        </foreach>
+    </delete>
+    
+</mapper>
